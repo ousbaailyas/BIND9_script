@@ -1,6 +1,7 @@
 # BIND9
 
 BIND is a suite of software for interacting with the Domain Name System. Its most prominent component, named, performs both of the main DNS server roles, acting as an authoritative name server for DNS zones and as a recursive resolver in the network.
+it was initially released in 2000 and is regularly maintained by the Internet Systems Consortium.
 
 # BIND9_script
 A simple script to setup bind9 tool
