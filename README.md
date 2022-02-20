@@ -12,6 +12,18 @@ A simple script to setup bind9 tool
 $ chmod +x bind_installer
 $ ./bind_installer
 ```
+## Or you export it to the PATH environmental variable
+
+PATH is an environmental variable in Linux and other Unix-like operating systems that tells the shell which directories to search for executable files (i.e., ready-to-run programs) in response to commands issued by a user.
+
+```
+$ sudo echo "$PATH"
+usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+
+$ sudo mv bind_installer /<sbin or any path you like>
+$ sudo bind_installer
+
+```
 
 ![alt text](https://github.com/ousbaailyas/BIND9_script/blob/master/Screen%20Shot%202022-02-20%20at%2010.55.51%20PM.png)
 
