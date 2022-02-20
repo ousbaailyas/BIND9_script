@@ -12,7 +12,7 @@ A simple script to setup bind9 tool
 $ chmod +x bind_installer
 $ ./bind_installer
 ```
-## Or you export it to the PATH environmental variable
+## Or you can export it to the PATH environmental variable
 
 PATH is an environmental variable in Linux and other Unix-like operating systems that tells the shell which directories to search for executable files (i.e., ready-to-run programs) in response to commands issued by a user.
 
