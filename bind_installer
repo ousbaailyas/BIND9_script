@@ -1,0 +1,210 @@
+#!/bin/bash
+# Regular Colors
+Black='\e[0;30m'        # Black
+Red='\e[0;31m'          # Red
+Green='\e[32m'        # Green
+Yellow='\e[0;33m'       # Yellow
+Blue='\e[0;34m'         # Blue
+Purple='\e[0;35m'       # Purple
+Cyan='\e[0;36m'         # Cyan
+White='\e[0;37m'        # White
+# Bold
+BBlack='\e[1;30m'       # Black
+BRed='\e[1;31m'         # Red
+BGreen='\e[1;32m'       # Green
+BYellow='\e[1;33m'      # Yellow
+BBlue='\e[1;34m'        # Blue
+BPurple='\e[1;35m'      # Purple
+BCyan='\e[1;36m'        # Cyan
+BWhite='\e[1;37m'       # White
+# Default
+DefaultColor='\e[39m'   # Default foreground color
+if [ $EUID -ne 0 ]; then # Super User Check    #EUID: Effective user ID
+	
+	echo -e "\n	${Red}Aborted, please execute the script as root.${DefaultColor}\n"; exit 1
+fi
+
+interface=$(ip route | grep default | sed -e "s/^.*dev.//" -e "s/.proto.*//") #: int name
+ipaddress=$(ip -o addr show dev "$interface" | awk '$3 == "inet" {print $4}') #| sed -r 's!/.*!!; s!.*\.!!') #: ip address/netmask /last number of the ip 
+gtw=$(/sbin/ip route | awk '/default/ { print $3 }')
+hostname=$(sudo systemd-resolve --status | grep "DNS Domain:" | awk '{print $3}')
+DNSOverTLS=$(sudo systemd-resolve --status | grep "DNSOverTLS setting:" | awk 'NR>=2{print $3}')
+CurrentDNSServer=$(sudo systemd-resolve --status | grep "Current DNS Server:" | awk '{print $4}')
+
+status=$(sudo systemctl restart named.service && sudo systemctl status named.service  | grep "Active:" | awk  '{print $2 $3}')
+PID=$(sudo systemctl status named.service  | grep "PID:" | awk  '{print $3}')
+revip=$(ip -o addr show dev "ens33" | awk '$3 == "inet" {print $4}' | sed -r 's!/.*!!; s!.*\.!!')
+
+
+logo=$(
+echo -e "                                                                        
+
+     ${DefaultColor}G@@@@@@@@@@@B~  5@@@@@                         P@@@@@! ${Cyan}:G@@@@@&@@@@#?  
+     ${DefaultColor}G@@@@@5?#@@@@#.         5@@@@@  @@@@@   :?5PPY!P@@@@@! ${Cyan}5@@@@@7.5@@@@@~ 
+     ${DefaultColor}G@@@@@! 5@@@@@^ P@@@@@J Y@@@@@@@@@@@@j  :&@@@@@#&@@@@@! ${Cyan}G@@@@@^ J@@@@@7 
+     ${DefaultColor}G@@@@@J~B@@@@B. P@@@@@? Y@@@@@@/B@@@@1 !@@@@@5 P@@@@@! ${Cyan}G@@@@@^ J@@@@@? 
+     ${DefaultColor}G@@@@@@@@@@#Y:  P@@@@@? Y@@@@@7 B@@@@1 !@@@@@5 P@@@@@! ${Cyan}G@@@@@! 5@@@@@? 
+     ${DefaultColor}G@@@@@PY&@@@@B^ P@@@@@? Y@@@@@7 B@@@@1 !@@@@@5 P@@@@@! ${Cyan}7@@@@@@#@@@@@@? 
+     ${DefaultColor}G@@@@@7 5@@@@@Y P@@@@@? Y@@@@@7 B@@@@1 !@@@@@5 P@@@@@!         ${Cyan}5@@@@@? 
+     ${DefaultColor}G@@@@@7 5@@@@@Y P@@@@@J Y@@@@@? B@@@@1 !@@@@@5 P@@@@@! ${Cyan}G@@@@@  J@@@@@7 
+     ${DefaultColor}G@@@@@PJ#@@@@@J P@@@@@J Y@@@@@? B@@@@1 !@@@@@P.G@@@@@! ${Cyan}5@@@@@7:P@@@@@~ 
+     ${DefaultColor}G@@@@@@@@@@@@B^ P@@@@@J Y@@@@@? B@@@@1 :#@@@@@#@@@@@@! ${Cyan}.5&@@@@@@@@@B7 
+   
+     	  ${DefaultColor}A simple script to setup bind9 tool developed by Ilys Ousbaa
+		
+			       ${Cyan}github.com/ousbaailyas
+"
+)
+echo "$logo"
+echo -e "\n"
+echo -e "	${DefaultColor}[1] Static IP Address Assignment\n"
+echo -e "	${DefaultColor}[2] BIND domain name setup"
+echo -e "\n"
+
+read -p $'   	\e[1;37mChose a an option by number: ' num
+ num1=1
+ num2=2
+ num3=3
+   
+     if [ "$num1" == $num ]; then
+
+echo "$logo"	
+echo -e "\n"
+echo -e "	${DefaultColor}Your current ip address: 	${Green}$ipaddress"
+echo -e "	${DefaultColor}Default gateway: 		${Green}$gtw"
+echo -e "	${DefaultColor}Current search domain: 	${Green}$hostname"
+echo -e "	${DefaultColor}Current DNS Server: 		${Green}$CurrentDNSServer"
+echo ""
+read -p $'	\e[1;37mChose an Ip address >\e[39m '  stip  
+
+echo ""
+read -p $'	Your Default gateway >\e[39m ' stgtw
+
+echo ""
+read -p $'	The Network prefix >\e[39m ' npr  
+echo ""
+read -p $'	A DNS address >\e[39m ' stdns
+
+sudo echo "network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    $interface:
+      addresses:
+        - $stip/$npr
+      gateway4: $stgtw
+      nameservers:
+          search: [$dm]
+          addresses: [$stdns]" > /etc/netplan/*.yaml && sudo netplan apply
+#---------------------------------------------------------#
+
+echo -e "\n\n\n\n\n\n\n"
+echo "$logo"		
+echo -e "	${DefaultColor}Interface name: 		${Green}$interface"
+echo -e "	${DefaultColor}Your current ip address: 	${Green}$ipaddress"
+echo -e "	${DefaultColor}Default gateway: 		${Green}$gtw"
+echo -e "	${DefaultColor}Current search domain: 	${Green}$hostname"
+echo -e "	${DefaultColor}Current DNS Server: 		${Green}$CurrentDNSServer" 
+echo -e "	${DefaultColor}Bind Status:			${Green}$status" 
+echo -e "	${DefaultColor}Bind PID:			${Green}$PID" 
+echo ""
+
+#===================BIND domain name setup==================================#
+  elif [ "$num2" == $num ]; then
+  echo "$logo"
+echo -e "\n\n\n\n\n\n"
+read -p $'     \e[0;36mYour caching name server >\e[39m '  cns
+
+echo ""
+read -p $'     \e[0;36mYour domain name >\e[39m '  dm
+
+echo ""
+read -p $'     \e[0;36mIP for the domain name > \e[39m'  ip
+
+echo ""
+read -p $'     \e[0;36mA serial number >\e[39m '  serial
+
+echo -ne "\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+
+###########################################################
+#             named.conf.options                          #                                                    
+###########################################################
+echo "options {
+	directory */var/cache/bind*;
+	forwarders {
+		$cns;
+	};
+	 dnssec-validation auto;
+
+        listen-on-v6 { any; };
+};" >  /etc/bind/named.conf.options && 
+sudo sed -i 's/*/"/g' /etc/bind/named.conf.options
+
+############################################################
+#             db.domainname.exemple                        #                                                   
+############################################################
+echo "timetolive	604800
+@	IN	SOA	$dm.	$(whoami).$dm. (
+			$serial		; Serial
+			 604800		; Refresh
+			  86400		; Retry
+			2419200		; Expire
+			 604800 )	; Negative Cache TTL
+;
+@	IN	NS	$(whoami).$dm.
+@	IN	A	$ip
+$(whoami)	IN	A	$ip" > /etc/bind/db.$dm && sed -i 's/timetolive/$TTL/g'  /etc/bind/db.$dm 
+
+
+###########################################################
+#             rev-db.domainname.exemple                   #
+###########################################################
+echo "timetolive	604800
+@	IN	SOA	$dm.	$(whoami).$dm. (
+			 $serial	; Serial
+			 604800	; Refresh
+			  86400	; Retry
+			2419200	; Expire
+			 604800 )	; Negative Cache TTL
+;
+@	IN	NS	$(whoami).
+$revip	IN	PTR	$(whoami).$dm." > /etc/bind/rev-db.$dm && sed -i 's/timetolive/$TTL/g'  /etc/bind/rev-db.$dm
+
+###########################################################
+#             named.conf.local                            #
+###########################################################
+echo "
+zone *$dm* {
+    type master;
+    file */etc/bind/db.$dm*;
+};
+
+zone *1.168.192.in-addr.arpa* {
+    type master;
+    file */etc/bind/rev-db.$dm*;
+};
+" > /etc/bind/named.conf.local &&  sudo sed -i 's/*/"/g' /etc/bind/named.conf.local && sudo systemctl restart named.service && sudo rm db. rev-db.
+
+echo -ne "\n"
+echo "$logo"
+echo -ne "\n\n\n\n\n\n"
+echo -ne $'	▇▇▇▇▇                         16%\r'
+sleep 1
+echo -ne $'	▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ 30%\r'
+sleep 1
+echo -ne $'	▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ 100%\r'
+sleep 1
+echo -e "\n\n\n\n\n\n\n"
+echo "$logo"		
+echo ""
+echo -e "	${DefaultColor}Your current ip address: 	${BGreen}$ipaddress"
+echo -e "	${DefaultColor}Default gateway: 		${BGreen}$gtw"
+echo -e "	${DefaultColor}Current search domain: 	${BGreen}$hostname"
+echo -e "	${DefaultColor}Current DNS Server: 		${BGreen}$CurrentDNSServer" 
+echo -e "	${DefaultColor}Bind Status:			${Green}$status" 
+echo -e "	${DefaultColor}Bind PID:			${BGreen}$PID" 
+
+	else
+	 echo "$logo" ; exit
+fi
+
