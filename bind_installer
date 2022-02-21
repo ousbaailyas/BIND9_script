@@ -96,8 +96,7 @@ sudo echo "network:
       nameservers:
           search: [$dm]
           addresses: [$stdns]" > /etc/netplan/*.yaml && sudo netplan apply
-#---------------------------------------------------------#
-
+#-------------------------------------------------------------------------------#
 echo -e "\n\n\n\n\n\n\n"
 echo "$logo"		
 echo -e "	${DefaultColor}Interface name: 		${Green}$interface"
@@ -109,7 +108,7 @@ echo -e "	${DefaultColor}Bind Status:			${Green}$status"
 echo -e "	${DefaultColor}Bind PID:			${Green}$PID" 
 echo ""
 
-#===================BIND domain name setup==================================#
+#============================BIND domain name setup==============================#
   elif [ "$num2" == $num ]; then
   echo "$logo"
 echo -e "\n\n\n\n\n\n"
@@ -188,7 +187,7 @@ zone *1.168.192.in-addr.arpa* {
 echo -ne "\n"
 echo "$logo"
 echo -ne "\n\n\n\n\n\n"
-echo -ne $'	▇▇▇▇▇                         16%\r'
+echo -ne $'	▇▇▇▇▇ 16%\r'
 sleep 1
 echo -ne $'	▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇▇ 30%\r'
 sleep 1
