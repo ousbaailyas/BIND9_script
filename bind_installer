@@ -33,7 +33,7 @@ CurrentDNSServer=$(sudo systemd-resolve --status | grep "Current DNS Server:" | 
 
 status=$(sudo systemctl restart named.service && sudo systemctl status named.service  | grep "Active:" | awk  '{print $2 $3}')
 PID=$(sudo systemctl status named.service  | grep "PID:" | awk  '{print $3}')
-revip=$(ip -o addr show dev "ens33" | awk '$3 == "inet" {print $4}' | sed -r 's!/.*!!; s!.*\.!!')
+revip=$(ip -o addr show dev "$interface" | awk '$3 == "inet" {print $4}' | sed -r 's!/.*!!; s!.*\.!!')
 
 
 logo=$(
